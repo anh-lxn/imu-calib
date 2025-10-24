@@ -84,8 +84,8 @@ def plot_imu_data_and_standstill(imu_data, standstill_flags):
     ax[0].legend(["ax", "ay", "az"])
 
     ax[1].plot(imu_data[:, 3], label = "wx")
-    ax[1].plot(imu_data[:, 4], label = "wx")
-    ax[1].plot(imu_data[:, 5], label = "wx")
+    ax[1].plot(imu_data[:, 4], label = "wy")
+    ax[1].plot(imu_data[:, 5], label = "wz")
     ax[1].plot(standstill_flags)
 
     idxs_standstill = standstill_flags > 0

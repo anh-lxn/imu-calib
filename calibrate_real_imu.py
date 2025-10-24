@@ -29,9 +29,10 @@ if __name__ == '__main__':
     dt = 1 / args.sampling_frequency
     datafile = args.file
 
-    #imu_data = pd.read_csv(CSV).to_numpy()
-
-    imu_data = np.genfromtxt(datafile, delimiter=' ')
+    imu_data = pd.read_csv(CSV)
+    #imu_data["gz"] = imu_data["gz"].clip(-0.0001, 0.0001)
+    imu_data = imu_data.to_numpy()
+    #imu_data = np.genfromtxt(datafile, delimiter=' ')
     standstill = generate_standstill_flags(imu_data)
     counter = 0
     done = False
@@ -43,6 +44,7 @@ if __name__ == '__main__':
             print("Standstill length: ", counter)
             counter = 0
             done = True
+    #imu_data = imu_data[:,:]
     plot_imu_data_and_standstill(imu_data, standstill)
 
     accs, angs = imu_data[:,0:3], imu_data[:,3:6]
