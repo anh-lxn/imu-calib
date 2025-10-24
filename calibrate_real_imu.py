@@ -1,16 +1,26 @@
 import numpy as np
 import argparse
 import time
+import os
+import pandas as pd
+from scipy.signal import savgol_filter
 
 from code.helpers import *
 from code.cost_functions import *
 from code.utilities import *
 
+np.set_printoptions(suppress=True, precision=6)
+
+# Pfade
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "../../../..", "data")  # ../data relativ zu src/
+CSV = os.path.join(DATA_DIR, "data.csv")
+
 np.set_printoptions(edgeitems=30, linewidth=1000, formatter={'float': '{: 0.4f}'.format})
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description = 'Run calibration on real data from IMU.')
-    parser.add_argument('--sampling_frequency', help = 'Sampling frequency for logfile.', 
+    parser.add_argument('--sampling_frequency', help = 'Sampling frequency for logfile.',
         required = True, type = int)
     parser.add_argument('--file', help = 'Path to file with data from IMU.',
         required = True, type = str)
@@ -19,8 +29,7 @@ if __name__ == '__main__':
     dt = 1 / args.sampling_frequency
     datafile = args.file
 
-    # read file with ax, ay, az, wx, wy, wz measurements from IMU
-    imu_data = np.genfromtxt(datafile, delimiter=' ')
+    imu_data = pd.read_csv(CSV).to_numpy()
     standstill = generate_standstill_flags(imu_data)
 
     plot_imu_data_and_standstill(imu_data, standstill)
@@ -44,14 +53,14 @@ if __name__ == '__main__':
     theta_found_gyr = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
     theta_found_gyr[-6:-3] = np.mean(angs[0:100,:], axis=0)
 
-    residualSum = lambda: np.sum(np.rad2deg(residual_gyr(theta_found_gyr, 
-             angs, 
+    residualSum = lambda: np.sum(np.rad2deg(residual_gyr(theta_found_gyr,
+             angs,
              accs_calibrated,
              standstill, dt))**2)
 
     print("Gyroscope residuals before calibration: ", residualSum())
     time_start = time.time()
-    theta_found_gyr = find_calib_params_gyr(True, residual_gyr, theta_found_gyr, 
+    theta_found_gyr = find_calib_params_gyr(True, residual_gyr, theta_found_gyr,
         angs, accs_calibrated, standstill, 1.0/args.sampling_frequency)
     time_end = time.time()
     print("GYR calibration done in: ", time_end - time_start, "seconds")
