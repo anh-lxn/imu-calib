@@ -7,15 +7,16 @@ from code.helpers import integrate_gyroscope
 def generate_standstill_flags(imu_data):
     standstill = np.zeros(len(imu_data))
     counter_after_motion = 60
+    number = counter_after_motion
     # generate standstill flags
     for i, m in enumerate(imu_data):
         if np.linalg.norm(m[3:6]) < 0.13:
             counter_after_motion += 1
-            if counter_after_motion > 60:
+            if counter_after_motion > number:
                 standstill[i] = 1
         else:
             standstill[i] = 0
-            standstill[i-60:i] = 0
+            standstill[i-number:i] = 0
             counter_after_motion = 0
 
     return standstill
@@ -28,11 +29,11 @@ def plot_corrupted_accelerometer_and_gyro_measurements(corrupted_accelerometer_m
 
     fig, ax = plt.subplots(2, 1, figsize=(16, 6))
     ax[0].plot(np.linalg.norm(corrupted_accelerometer_measurements, axis=1), label = "Accelerometer norm")
-    ax[0].plot(np.arange(0, len(standstill_flags))[idxs_standstill], 
-        standstill_flags[idxs_standstill] + 10.0, 
+    ax[0].plot(np.arange(0, len(standstill_flags))[idxs_standstill],
+        standstill_flags[idxs_standstill] + 10.0,
         linestyle='none', marker='.', alpha=0.9, color='green', label = "Standstill")
-    ax[0].plot(np.arange(0, len(standstill_flags))[idxs_motion], 
-        standstill_flags[idxs_motion] + 10.0, 
+    ax[0].plot(np.arange(0, len(standstill_flags))[idxs_motion],
+        standstill_flags[idxs_motion] + 10.0,
         linestyle='none', marker='.', alpha=0.9, color='red', label = "In motion")
     ax[0].set(xlabel = "sample #", ylabel="$m/s^2$")
     ax[0].set_title("Accelerometer measurements norm and standstill during simulated rotations")
@@ -89,9 +90,9 @@ def plot_imu_data_and_standstill(imu_data, standstill_flags):
 
     idxs_standstill = standstill_flags > 0
     idxs_motion = standstill_flags < 1e-8
-    ax[1].plot(np.arange(0, len(standstill_flags))[idxs_standstill], standstill_flags[idxs_standstill], 
+    ax[1].plot(np.arange(0, len(standstill_flags))[idxs_standstill], standstill_flags[idxs_standstill],
         label = "standstill", linestyle='none', marker='.', alpha=0.9, color='green')
-    ax[1].plot(np.arange(0, len(standstill_flags))[idxs_motion], standstill_flags[idxs_motion], 
+    ax[1].plot(np.arange(0, len(standstill_flags))[idxs_motion], standstill_flags[idxs_motion],
         label = "in-motion", linestyle='none', marker='.', alpha=0.9, color='red')
     ax[1].legend()
 

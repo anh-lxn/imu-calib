@@ -3,7 +3,7 @@ import argparse
 import time
 import os
 import pandas as pd
-from scipy.signal import savgol_filter
+
 
 from code.helpers import *
 from code.cost_functions import *
@@ -29,9 +29,20 @@ if __name__ == '__main__':
     dt = 1 / args.sampling_frequency
     datafile = args.file
 
-    imu_data = pd.read_csv(CSV).to_numpy()
-    standstill = generate_standstill_flags(imu_data)
+    #imu_data = pd.read_csv(CSV).to_numpy()
 
+    imu_data = np.genfromtxt(datafile, delimiter=' ')
+    standstill = generate_standstill_flags(imu_data)
+    counter = 0
+    done = False
+    for i in range(len(standstill)):
+        if standstill[i] > 0:
+            counter += 1
+            done = False
+        if standstill[i] == 0 and not done:
+            print("Standstill length: ", counter)
+            counter = 0
+            done = True
     plot_imu_data_and_standstill(imu_data, standstill)
 
     accs, angs = imu_data[:,0:3], imu_data[:,3:6]
